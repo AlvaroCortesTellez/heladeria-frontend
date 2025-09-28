@@ -1,0 +1,34 @@
+import React, { useState, useEffect } from 'react';
+
+export default function IngredienteForm({ ingrediente = {}, onSave, onCancel }) {
+  const [form, setForm] = useState({
+    nombre: '', precio: 0, calorias: 0, inventario: 0, es_vegetariano: false, es_sano: true, tipo: 'base', sabor: ''
+  });
+
+  useEffect(()=>{ if (ingrediente) setForm({ ...form, ...ingrediente }); }, [ingrediente]);
+
+  const submit = (e) => {
+    e.preventDefault();
+    onSave(form);
+  };
+
+  return (
+    <form onSubmit={submit} className="mb-4 p-4 border rounded">
+      <input value={form.nombre} onChange={e=>setForm({...form,nombre:e.target.value})} placeholder="Nombre" />
+      <input type="number" value={form.precio} onChange={e=>setForm({...form,precio:+e.target.value})} placeholder="Precio" />
+      <input type="number" value={form.calorias} onChange={e=>setForm({...form,calorias:+e.target.value})} placeholder="Calorías" />
+      <input type="number" value={form.inventario} onChange={e=>setForm({...form,inventario:+e.target.value})} placeholder="Inventario" />
+      <select value={form.tipo} onChange={e=>setForm({...form,tipo:e.target.value})}>
+        <option value="base">base</option>
+        <option value="complemento">complemento</option>
+      </select>
+      {form.tipo === 'base' && <input placeholder="Sabor" value={form.sabor || ''} onChange={e=>setForm({...form,sabor:e.target.value})} />}
+      <label><input type="checkbox" checked={form.es_vegetariano} onChange={e=>setForm({...form,es_vegetariano:e.target.checked})} /> Vegetariano</label>
+      <label><input type="checkbox" checked={form.es_sano} onChange={e=>setForm({...form,es_sano:e.target.checked})} /> Sano</label>
+      <div>
+        <button type="submit" className="mr-2">Guardar</button>
+        <button type="button" onClick={onCancel}>Cancelar</button>
+      </div>
+    </form>
+  );
+}

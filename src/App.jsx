@@ -1,36 +1,32 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
-import IngredientesPage from "./pages/IngredientesPage";
-import ProductosPage from "./pages/ProductosPage";
-import LoginPage from "./pages/LoginPage";
-import { AuthProvider } from "./components/auth/AuthProvider";
-import ProtectedRoute from "./components/common/ProtectedRoute";
+import React, { useEffect, useState } from "react";
+import { supabase } from "./lib/supabaseClient";
+import UserCreate from "./components/UserCreate";
+import UserList from "./components/UserList";
 
-export default function App() {
+function App() {
+  const [users, setUsers] = useState([]);
+
+  // Cargar usuarios desde Supabase
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const { data, error } = await supabase.from("users").select("*");
+      if (error) console.error("Error cargando usuarios:", error.message);
+      else setUsers(data);
+    };
+    fetchUsers();
+  }, []);
+
+  const addUser = (newUser) => {
+    setUsers([...users, newUser]);
+  };
+
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route
-            path="/ingredientes"
-            element={
-              <ProtectedRoute>
-                <IngredientesPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/productos"
-            element={
-              <ProtectedRoute>
-                <ProductosPage />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </Router>
-    </AuthProvider>
+    <div>
+      <h1>Gestión de Usuarios</h1>
+      <UserCreate onUserCreated={addUser} />
+      <UserList users={users} />
+    </div>
   );
 }
+
+export default App;

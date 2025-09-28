@@ -1,44 +1,67 @@
 import React, { useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 
-export default function UserCreate({ onUserCreated }) {
+function UserCreate({ onUserCreated }) {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [nombre, setNombre] = useState("");
-  const [rol, setRol] = useState("cliente");
+  const [age, setAge] = useState("");
   const [error, setError] = useState("");
 
-  const handleCreateUser = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const { data, error: authError } = await supabase.auth.signUp({ email, password });
-      if (authError) throw authError;
+    setError("");
 
-      const { error: tableError } = await supabase.from("users").insert([{ id: data.user.id, nombre, rol }]);
-      if (tableError) throw tableError;
+    const { data, error } = await supabase
+      .from("users")
+      .insert([{ name, email, age: parseInt(age) }])
+      .select();
 
-      setEmail(""); setPassword(""); setNombre(""); setRol("cliente");
-      if (onUserCreated) onUserCreated();
-    } catch (err) {
-      setError(err.message);
+    if (error) {
+      setError(error.message);
+    } else {
+      setName("");
+      setEmail("");
+      setAge("");
+      if (onUserCreated) onUserCreated(data[0]);
     }
   };
 
   return (
-    <div className="card p-4 mb-4">
-      <h3>Crear Usuario</h3>
-      {error && <div className="alert alert-danger">{error}</div>}
-      <form onSubmit={handleCreateUser}>
-        <input type="text" placeholder="Nombre" className="form-control mb-2" value={nombre} onChange={e=>setNombre(e.target.value)} required />
-        <input type="email" placeholder="Email" className="form-control mb-2" value={email} onChange={e=>setEmail(e.target.value)} required />
-        <input type="password" placeholder="Contraseña" className="form-control mb-2" value={password} onChange={e=>setPassword(e.target.value)} required />
-        <select className="form-select mb-2" value={rol} onChange={e=>setRol(e.target.value)}>
-          <option value="cliente">Cliente</option>
-          <option value="empleado">Empleado</option>
-          <option value="admin">Admin</option>
-        </select>
-        <button type="submit" className="btn btn-primary w-100">Crear Usuario</button>
+    <div style={{ maxWidth: "400px", margin: "0 auto" }}>
+      <h2>Crear Usuario</h2>
+      {error && <div style={{ color: "red" }}>{error}</div>}
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Nombre</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Correo electrónico</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Edad</label>
+          <input
+            type="number"
+            value={age}
+            onChange={(e) => setAge(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit">Crear Usuario</button>
       </form>
     </div>
   );
 }
+
+export default UserCreate;

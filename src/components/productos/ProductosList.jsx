@@ -1,26 +1,24 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import ProductoCard from "./ProductoCard";
 
 export default function ProductosList() {
   const [productos, setProductos] = useState([]);
+  const [error, setError] = useState("");
 
   const fetchProductos = async () => {
-    const { data } = await supabase.from("productos").select("*");
-    setProductos(data);
+    const { data, error } = await supabase.from("productos").select("*");
+    if(error) setError(error.message);
+    else setProductos(data);
   };
 
-  useEffect(() => {
-    fetchProductos();
-  }, []);
+  useEffect(()=>{ fetchProductos(); }, []);
+
+  if(error) return <div className="alert alert-danger">{error}</div>;
 
   return (
-    <div className="row">
-      {productos.map((p) => (
-        <div className="col-md-4 mb-3" key={p.id}>
-          <ProductoCard producto={p} />
-        </div>
-      ))}
+    <div className="d-flex flex-wrap">
+      {productos.map(p => <ProductoCard key={p.id} producto={p} />)}
     </div>
   );
 }

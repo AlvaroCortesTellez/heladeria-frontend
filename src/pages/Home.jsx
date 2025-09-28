@@ -1,65 +1,33 @@
 import React, { useState } from "react";
+import ProductosPage from "./ProductosPage";
+import IngredientesPage from "./IngredientesPage";
+import LoginPage from "./LoginPage";
 import UserCreate from "../components/users/UserCreate";
 import UserList from "../components/users/UserList";
-import IngredientesPage from "./IngredientesPage";
-import ProductosPage from "./ProductosPage";
-import LoginPages from "./LoginPage";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-
-export default function Home() {
-  const [page, setPage] = useState("home");
-
-  const renderContent = () => {
-    switch (page) {
-      case "ingredientes":
-        return <IngredientesPage />;
-      case "productos":
-        return <ProductosPage />;
-      case "createUser":
-        return <UserCreate />;
-      case "login":
-        return <LoginPages />;
-      case "userList":
-        return <UserList />;
-      default:
-        return (
-          <div className="text-center mt-5">
-            <h1>Bienvenido a la Heladería</h1>
-            <p>Selecciona una opción del menú para comenzar</p>
-          </div>
-        );
-    }
-  };
+function Home() {
+  const [page, setPage] = useState("login");
+  const [user, setUser] = useState(null);
 
   return (
-    <div className="container mt-4">
-      {/* Menú de navegación */}
-      <div className="d-flex justify-content-center mb-4 flex-wrap">
-        <button className="btn btn-primary mx-2 my-1" onClick={() => setPage("ingredientes")}>
-          Ingredientes
-        </button>
-        <button className="btn btn-success mx-2 my-1" onClick={() => setPage("productos")}>
-          Productos
-        </button>
-        <button className="btn btn-warning mx-2 my-1" onClick={() => setPage("createUser")}>
-          Crear Usuario
-        </button>
-        <button className="btn btn-info mx-2 my-1" onClick={() => setPage("login")}>
-          Ingresar Usuario
-        </button>
-        <button className="btn btn-secondary mx-2 my-1" onClick={() => setPage("userList")}>
-          Listado de Usuarios
-        </button>
-        <button className="btn btn-dark mx-2 my-1" onClick={() => setPage("home")}>
-          Inicio
-        </button>
+    <div className="container my-4">
+      <h1 className="text-center mb-4">Heladería</h1>
+      <div className="mb-3 text-center">
+        <button className="btn btn-outline-primary mx-1" onClick={() => setPage("login")}>Login</button>
+        <button className="btn btn-outline-secondary mx-1" onClick={() => setPage("createUser")}>Crear Usuario</button>
+        <button className="btn btn-outline-info mx-1" onClick={() => setPage("userList")}>Usuarios</button>
+        <button className="btn btn-outline-success mx-1" onClick={() => setPage("ingredientes")}>Ingredientes</button>
+        <button className="btn btn-outline-warning mx-1" onClick={() => setPage("productos")}>Productos</button>
       </div>
 
-      {/* Contenido según sección */}
-      <div className="border p-4 rounded shadow-sm bg-light">
-        {renderContent()}
-      </div>
+      {page === "login" && <LoginPage onLogin={setUser} />}
+      {page === "createUser" && <UserCreate />}
+      {page === "userList" && <UserList />}
+      {page === "ingredientes" && <IngredientesPage />}
+      {page === "productos" && <ProductosPage />}
     </div>
   );
 }
+
+export default Home;

@@ -1,11 +1,13 @@
 import React from "react";
-import ProductosList from "../productos/ProductosList";
+import ProductosList from "../components/productos/ProductosList";
 
-export default function ProductosPage() {
+function ProductosPage() {
   return (
-    <div>
-      <h1>Gestión de Productos</h1>
+    <div className="container mt-4">
+      <h2>Gestión de Productos</h2>
       <ProductosList />
     </div>
   );
 }
+
+export default ProductosPage;

@@ -1,50 +1,36 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 
-export default function UserList() {
+function UserList() {
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const fetchUsers = async () => {
-    setLoading(true);
-    const { data, error } = await supabase.from("users").select("*");
-    if (error) {
-      console.error("Error fetching users:", error.message);
-    } else {
-      setUsers(data);
-    }
-    setLoading(false);
-  };
+  const [mensaje, setMensaje] = useState("");
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
+  const fetchUsers = async () => {
+    const { data, error } = await supabase.from("users").select("*");
+    if (error) {
+      setMensaje(error.message);
+    } else {
+      setUsers(data);
+    }
+  };
+
   return (
-    <div>
-      <h3 className="text-center mb-3">Listado de Usuarios</h3>
-      {loading ? (
-        <div className="text-center">Cargando...</div>
-      ) : (
-        <table className="table table-striped table-bordered">
-          <thead className="table-dark">
-            <tr>
-              <th>Nombre</th>
-              <th>Rol</th>
-              <th>ID</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((u) => (
-              <tr key={u.id}>
-                <td>{u.nombre}</td>
-                <td>{u.rol}</td>
-                <td>{u.id}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+    <div className="card p-3 my-3">
+      <h5>Lista de Usuarios</h5>
+      {mensaje && <div className="alert alert-danger">{mensaje}</div>}
+      <ul className="list-group">
+        {users.map((u) => (
+          <li key={u.id} className="list-group-item">
+            {u.nombre} - {u.rol} - {u.email || "Sin email"}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
+
+export default UserList;

@@ -2,7 +2,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./components/auth/AuthProvider";
-import Navbar from "./components/common/Navbar";
+import Navbar from "./components/common/Nabvar";
 import Home from "./pages/Home";
 import LoginPage from "./pages/LoginPage";
 import ProductosPage from "./pages/ProductosPage";

@@ -1,29 +1,36 @@
+import { useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 
 export default function SellProductModal({ producto, onClose }) {
+  const [cantidad, setCantidad] = useState(1);
+
   const handleSell = async () => {
-    await supabase.rpc("vender_producto", { producto_id: producto.id });
-    alert("Venta realizada!");
+    // Registrar venta
+    const total = producto.precio_publico * cantidad;
+    const { error: ventaError } = await supabase.from("ventas").insert({
+      producto_id: producto.producto_id,
+      cantidad,
+      total,
+    });
+
+    if (ventaError) return alert("Error al registrar venta: " + ventaError.message);
+
+    // Aquí podrías actualizar inventario de ingredientes
+    alert("Venta registrada!");
     onClose();
   };
 
   return (
-    <div className="modal show d-block" tabIndex="-1">
-      <div className="modal-dialog">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">Vender {producto.nombre}</h5>
-            <button type="button" className="btn-close" onClick={onClose}></button>
-          </div>
-          <div className="modal-body">
-            <p>¿Confirmas la venta de este producto?</p>
-          </div>
-          <div className="modal-footer">
-            <button className="btn btn-secondary" onClick={onClose}>Cancelar</button>
-            <button className="btn btn-success" onClick={handleSell}>Confirmar</button>
-          </div>
-        </div>
-      </div>
+    <div className="modal">
+      <h3>Vender {producto.nombre}</h3>
+      <input
+        type="number"
+        min="1"
+        value={cantidad}
+        onChange={(e) => setCantidad(parseInt(e.target.value))}
+      />
+      <button onClick={handleSell}>Confirmar</button>
+      <button onClick={onClose}>Cancelar</button>
     </div>
   );
 }

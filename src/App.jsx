@@ -1,36 +1,26 @@
+import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
-import IngredientesPage from "./pages/IngredientesPage";
-import ProductosPage from "./pages/ProductosPage";
-import LoginPage from "./pages/LoginPage";
 import { AuthProvider } from "./components/auth/AuthProvider";
-import ProtectedRoute from "./components/common/ProtectedRoute";
+import Navbar from "./components/common/Nabvar";
+import Home from "./pages/Home";
+import LoginPage from "./pages/LoginPage";
+import ProductosPage from "./pages/ProductosPage";
+import IngredientesPage from "./pages/IngredientesPage";
 
-export default function App() {
+function App() {
   return (
     <AuthProvider>
       <Router>
+        <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route
-            path="/ingredientes"
-            element={
-              <ProtectedRoute>
-                <IngredientesPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/productos"
-            element={
-              <ProtectedRoute>
-                <ProductosPage />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/productos" element={<ProductosPage />} />
+          <Route path="/ingredientes" element={<IngredientesPage />} />
         </Routes>
       </Router>
     </AuthProvider>
   );
 }
+
+export default App;

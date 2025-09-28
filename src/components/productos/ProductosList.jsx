@@ -5,21 +5,28 @@ import ProductoCard from "./ProductoCard";
 export default function ProductosList() {
   const [productos, setProductos] = useState([]);
 
-  const fetchProductos = async () => {
-    const { data } = await supabase.from("productos").select("*");
-    setProductos(data);
-  };
-
   useEffect(() => {
+    const fetchProductos = async () => {
+      const { data, error } = await supabase
+        .from("v_rentabilidad_producto")
+        .select(`
+          producto_id,
+          nombre,
+          precio_publico,
+          costo,
+          rentabilidad,
+          total_calorias
+        `);
+      if (error) console.error(error);
+      else setProductos(data);
+    };
     fetchProductos();
   }, []);
 
   return (
-    <div className="row">
+    <div className="productos-grid">
       {productos.map((p) => (
-        <div className="col-md-4 mb-3" key={p.id}>
-          <ProductoCard producto={p} />
-        </div>
+        <ProductoCard key={p.producto_id} producto={p} />
       ))}
     </div>
   );

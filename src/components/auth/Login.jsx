@@ -1,59 +1,37 @@
-import React, { useState } from "react";
-import { supabase } from "../../lib/supabaseClient.js";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useContext } from "react";
+import { AuthContext } from "./AuthProvider";
 
 const Login = () => {
+  const { login } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
-  const navigate = useNavigate();
+  const [error, setError] = useState("");
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) setErrorMsg(error.message);
-    else navigate("/"); // redirige al home
+    setError("");
+    try {
+      await login(email, password);
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-4">
-          <div className="card p-4">
-            <h3 className="card-title text-center mb-3">Iniciar Sesión</h3>
-            {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
-            <form onSubmit={handleLogin}>
-              <div className="mb-3">
-                <label className="form-label">Correo</label>
-                <input
-                  type="email"
-                  className="form-control"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Contraseña</label>
-                <input
-                  type="password"
-                  className="form-control"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-              <button type="submit" className="btn btn-primary w-100">
-                Entrar
-              </button>
-            </form>
-          </div>
+    <div className="container mt-4">
+      <h3>Iniciar Sesión</h3>
+      {error && <div className="alert alert-danger">{error}</div>}
+      <form onSubmit={handleSubmit}>
+        <div className="mb-3">
+          <label>Email</label>
+          <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
-      </div>
+        <div className="mb-3">
+          <label>Contraseña</label>
+          <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        </div>
+        <button type="submit" className="btn btn-primary">Ingresar</button>
+      </form>
     </div>
   );
 };

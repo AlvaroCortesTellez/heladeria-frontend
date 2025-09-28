@@ -1,16 +1,40 @@
-import React from "react";
+import React, { useState, useContext } from "react";
+import { Button, Card } from "react-bootstrap";
+import SellProductModal from "./SellProductModal";
+import { AuthContext } from "../auth/AuthProvider";
 
 const ProductoCard = ({ producto }) => {
+  const { userRole } = useContext(AuthContext);
+  const [showSell, setShowSell] = useState(false);
+
   return (
-    <div className="card h-100">
-      <div className="card-body">
-        <h5 className="card-title">{producto.nombre}</h5>
-        <p className="card-text">Precio público: ${producto.precio_publico}</p>
-        <p className="card-text">Tipo: {producto.tipo}</p>
-        {producto.tipo === "copa" && <p className="card-text">Vaso: {producto.vaso}</p>}
-        {producto.tipo === "malteada" && <p className="card-text">Volumen: {producto.volumen_onzas} oz</p>}
-      </div>
-    </div>
+    <>
+      <Card>
+        <Card.Body>
+          <Card.Title>{producto.nombre}</Card.Title>
+          <Card.Text>Precio: ${producto.precio_publico}</Card.Text>
+          {["cliente", "empleado", "admin"].includes(userRole) && producto.total_calorias && (
+            <Card.Text>Calorías: {producto.total_calorias}</Card.Text>
+          )}
+          {["empleado", "admin"].includes(userRole) && producto.costo && (
+            <Card.Text>Costo: ${producto.costo}</Card.Text>
+          )}
+          {userRole === "admin" && producto.rentabilidad && (
+            <Card.Text>Rentabilidad: ${producto.rentabilidad}</Card.Text>
+          )}
+          <Button variant="success" onClick={() => setShowSell(true)} disabled={userRole === "public"}>
+            Vender
+          </Button>
+        </Card.Body>
+      </Card>
+
+      <SellProductModal
+        show={showSell}
+        onHide={() => setShowSell(false)}
+        producto={producto}
+        onSold={() => {}}
+      />
+    </>
   );
 };
 

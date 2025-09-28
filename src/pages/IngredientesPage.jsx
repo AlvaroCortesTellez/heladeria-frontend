@@ -1,10 +1,13 @@
-// src/pages/IngredientesPage.jsx
+import React from "react";
 import IngredientesList from "../components/ingredientes/IngredientesList";
 
-export default function IngredientesPage() {
+const IngredientesPage = () => {
   return (
-    <div>
+    <div className="container mt-4">
+      <h2>Ingredientes</h2>
       <IngredientesList />
     </div>
   );
-}
+};
+
+export default IngredientesPage;

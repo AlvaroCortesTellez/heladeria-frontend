@@ -1,15 +1,14 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "../../lib/supabaseClient.js";
+import React, { createContext, useEffect, useState } from "react";
+import { supabase } from "../../lib/supabaseClient";
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [role, setRole] = useState(null);
+  const [userRole, setUserRole] = useState("public"); // public por defecto
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Detecta sesión activa
     const session = supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
         setUser(data.session.user);
@@ -18,44 +17,44 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     });
 
-    // Listener de cambios de auth
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_, session) => {
-        if (session?.user) {
-          setUser(session.user);
-          fetchUserRole(session.user.id);
-        } else {
-          setUser(null);
-          setRole(null);
-        }
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser(session.user);
+        fetchUserRole(session.user.id);
+      } else {
+        setUser(null);
+        setUserRole("public");
       }
-    );
+    });
 
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  // Obtiene rol desde tabla pública users
   const fetchUserRole = async (userId) => {
     const { data, error } = await supabase
       .from("users")
       .select("rol")
       .eq("id", userId)
       .single();
+    if (!error && data) setUserRole(data.rol);
+    else setUserRole("cliente"); // default por seguridad
+  };
 
-    if (error) {
-      console.warn("No se pudo obtener rol de usuario:", error.message);
-      setRole("cliente"); // fallback
-    } else {
-      setRole(data.rol);
-    }
+  const login = async (email, password) => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    return data;
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setUserRole("public");
   };
 
   return (
-    <AuthContext.Provider value={{ user, role, loading }}>
+    <AuthContext.Provider value={{ user, userRole, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
 };
-
-// Hook para usar auth
-export const useAuth = () => useContext(AuthContext);

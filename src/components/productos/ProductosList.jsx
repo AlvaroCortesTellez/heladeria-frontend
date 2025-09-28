@@ -1,9 +1,15 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import ProductoCard from "./ProductoCard";
+import { AuthContext } from "../auth/AuthProvider";
 
-export default function ProductosList() {
+const ProductosList = () => {
+  const { userRole } = useContext(AuthContext);
   const [productos, setProductos] = useState([]);
+<<<<<<< HEAD
+=======
+  const [loading, setLoading] = useState(true);
+>>>>>>> f3601b207ea0add1c759beb397192741f5012458
 
   useEffect(() => {
     const fetchProductos = async () => {
@@ -23,6 +29,23 @@ export default function ProductosList() {
     fetchProductos();
   }, []);
 
+  const fetchProductos = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("productos")
+      .select(`
+        *,
+        v_calorias_producto(total_calorias),
+        v_costo_producto(costo),
+        v_rentabilidad_producto(rentabilidad)
+      `);
+    if (!error) setProductos(data);
+    setLoading(false);
+  };
+
+  if (loading) return <p>Cargando productos...</p>;
+  if (!productos.length) return <p>No hay productos disponibles.</p>;
+
   return (
     <div className="productos-grid">
       {productos.map((p) => (
@@ -30,4 +53,6 @@ export default function ProductosList() {
       ))}
     </div>
   );
-}
+};
+
+export default ProductosList;

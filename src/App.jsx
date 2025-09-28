@@ -1,11 +1,13 @@
+// src/App.jsx
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./components/auth/AuthProvider";
-import Navbar from "./components/common/Nabvar";
+import Navbar from "./components/common/Navbar";
 import Home from "./pages/Home";
 import LoginPage from "./pages/LoginPage";
 import ProductosPage from "./pages/ProductosPage";
 import IngredientesPage from "./pages/IngredientesPage";
+import ProtectedRoute from "./components/common/ProtectedRoute";
 
 function App() {
   return (
@@ -16,7 +18,14 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/productos" element={<ProductosPage />} />
-          <Route path="/ingredientes" element={<IngredientesPage />} />
+          <Route
+            path="/ingredientes"
+            element={
+              <ProtectedRoute>
+                <IngredientesPage />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </Router>
     </AuthProvider>

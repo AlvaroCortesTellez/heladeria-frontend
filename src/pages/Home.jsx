@@ -1,5 +1,4 @@
 import React from "react";
-<<<<<<< HEAD
 import ProductoCard from "../components/productos/ProductoCard";
 
 const productos = [
@@ -17,15 +16,6 @@ const Home = () => {
           <ProductoCard key={p.id} producto={p} />
         ))}
       </div>
-=======
-import ProductosList from "../components/productos/ProductosList";
-
-const Home = () => {
-  return (
-    <div className="container mt-4">
-      <h1>Bienvenido a la Heladería</h1>
-      <ProductosList />
->>>>>>> f3601b207ea0add1c759beb397192741f5012458
     </div>
   );
 };

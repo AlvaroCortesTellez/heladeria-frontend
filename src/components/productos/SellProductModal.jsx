@@ -1,56 +1,53 @@
 import React, { useState } from "react";
-import { supabase } from "../../lib/supabaseClient";
+import { supabase } from "../../lib/supabaseClient.js";
 
-function SellProductModal({ producto, onClose }) {
+const SellProductModal = ({ producto, onClose, onSold }) => {
   const [cantidad, setCantidad] = useState(1);
-  const [message, setMessage] = useState("");
-
   const handleSell = async () => {
-    if (cantidad <= 0) return;
+    // Crear venta
+    const { error: errVenta } = await supabase.from("ventas").insert([{
+      producto_id: producto.id,
+      cantidad,
+      total: producto.precio_publico * cantidad
+    }]);
+    if (errVenta) { alert(errVenta.message); return; }
 
-    const total = producto.precio_publico * cantidad;
+    // Reducir inventario de los ingredientes
+    const { data: ingredientes } = await supabase
+      .from("producto_ingrediente")
+      .select("ingrediente_id")
+      .eq("producto_id", producto.id);
 
-    const { error } = await supabase.from("ventas").insert([
-      {
-        producto_id: producto.id,
-        cantidad,
-        total,
-      },
-    ]);
-
-    if (error) setMessage(error.message);
-    else {
-      setMessage("Venta registrada con éxito!");
-      setCantidad(1);
+    for (const ing of ingredientes) {
+      const { data: ingrData } = await supabase.from("ingredientes").select("inventario, tipo").eq("id", ing.ingrediente_id).single();
+      let newInv = ingrData.inventario - cantidad;
+      if (ingrData.tipo === "complemento") newInv = 0; // complementos a 0
+      await supabase.from("ingredientes").update({ inventario: newInv }).eq("id", ing.ingrediente_id);
     }
+
+    onSold();
+    onClose();
   };
 
   return (
-    <div className="modal d-block" tabIndex="-1" style={{ background: "rgba(0,0,0,0.5)" }}>
+    <div className="modal d-block" tabIndex="-1">
       <div className="modal-dialog">
-        <div className="modal-content p-3">
-          <h5 className="modal-title">{producto.nombre}</h5>
-          {message && <div className="alert alert-info">{message}</div>}
-          <div className="mb-3">
-            <label className="form-label">Cantidad</label>
-            <input
-              type="number"
-              className="form-control"
-              value={cantidad}
-              onChange={(e) => setCantidad(parseInt(e.target.value))}
-              min={1}
-            />
+        <div className="modal-content">
+          <div className="modal-header">
+            <h5 className="modal-title">Vender {producto.nombre}</h5>
+            <button type="button" className="btn-close" onClick={onClose}></button>
           </div>
-          <button className="btn btn-success me-2" onClick={handleSell}>
-            Confirmar Venta
-          </button>
-          <button className="btn btn-secondary" onClick={onClose}>
-            Cerrar
-          </button>
+          <div className="modal-body">
+            <input type="number" className="form-control" min="1" value={cantidad} onChange={e => setCantidad(Number(e.target.value))} />
+          </div>
+          <div className="modal-footer">
+            <button className="btn btn-secondary" onClick={onClose}>Cancelar</button>
+            <button className="btn btn-primary" onClick={handleSell}>Vender</button>
+          </div>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default SellProductModal;

@@ -1,19 +1,61 @@
-import React, { createContext, useEffect, useState } from "react";
-import { supabase } from "../../lib/supabaseClient";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { supabase } from "../../lib/supabaseClient.js";
 
-export const AuthContext = createContext();
+const AuthContext = createContext();
 
-export default function AuthProvider({ children }) {
+export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const session = supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+    // Detecta sesión activa
+    const session = supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        setUser(data.session.user);
+        fetchUserRole(data.session.user.id);
+      }
+      setLoading(false);
     });
+
+    // Listener de cambios de auth
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_, session) => {
+        if (session?.user) {
+          setUser(session.user);
+          fetchUserRole(session.user.id);
+        } else {
+          setUser(null);
+          setRole(null);
+        }
+      }
+    );
 
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  return <AuthContext.Provider value={{ user }}>{children}</AuthContext.Provider>;
-}
+  // Obtiene rol desde tabla pública users
+  const fetchUserRole = async (userId) => {
+    const { data, error } = await supabase
+      .from("users")
+      .select("rol")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      console.warn("No se pudo obtener rol de usuario:", error.message);
+      setRole("cliente"); // fallback
+    } else {
+      setRole(data.rol);
+    }
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, role, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+// Hook para usar auth
+export const useAuth = () => useContext(AuthContext);

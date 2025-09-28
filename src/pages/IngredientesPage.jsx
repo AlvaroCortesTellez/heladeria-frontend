@@ -1,16 +1,10 @@
-import React, { useState } from "react";
-import IngredientesForm from "../components/ingredientes/IngredienteForm";
+// src/pages/IngredientesPage.jsx
 import IngredientesList from "../components/ingredientes/IngredientesList";
 
-function IngredientesPage() {
+export default function IngredientesPage() {
   return (
-    <div className="container mt-4">
-      <h2>Gestión de Ingredientes</h2>
-      <IngredientesForm />
-      <hr />
+    <div>
       <IngredientesList />
     </div>
   );
 }
-
-export default IngredientesPage;

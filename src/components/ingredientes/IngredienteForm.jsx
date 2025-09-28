@@ -1,134 +1,101 @@
-import React, { useState } from "react";
-import { supabase } from "../../lib/supabaseClient";
+import React, { useState, useEffect } from "react";
+import { supabase } from "../../lib/supabaseClient.js";
 
-function IngredientesForm() {
-  const [nombre, setNombre] = useState("");
-  const [precio, setPrecio] = useState(0);
-  const [calorias, setCalorias] = useState(0);
-  const [inventario, setInventario] = useState(0);
-  const [esVegetariano, setEsVegetariano] = useState(false);
-  const [esSano, setEsSano] = useState(true);
-  const [tipo, setTipo] = useState("base");
-  const [sabor, setSabor] = useState("");
-  const [message, setMessage] = useState("");
+const IngredienteForm = ({ ingrediente, onSave }) => {
+  const [formData, setFormData] = useState({
+    nombre: "",
+    precio: "",
+    calorias: "",
+    inventario: "",
+    es_vegetariano: false,
+    es_sano: true,
+    tipo: "base",
+    sabor: "",
+  });
+
+  useEffect(() => {
+    if (ingrediente) setFormData(ingrediente);
+  }, [ingrediente]);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({ ...formData, [name]: type === "checkbox" ? checked : value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
-
-    const { error } = await supabase.from("ingredientes").insert([
-      {
-        nombre,
-        precio,
-        calorias,
-        inventario,
-        es_vegetariano: esVegetariano,
-        es_sano: esSano,
-        tipo,
-        sabor,
-      },
-    ]);
-
-    if (error) setMessage(error.message);
+    let error;
+    if (ingrediente) {
+      // Update
+      const { data, error: err } = await supabase
+        .from("ingredientes")
+        .update(formData)
+        .eq("id", ingrediente.id);
+      error = err;
+    } else {
+      // Insert
+      const { data, error: err } = await supabase.from("ingredientes").insert([formData]);
+      error = err;
+    }
+    if (error) alert("Error: " + error.message);
     else {
-      setMessage("Ingrediente creado!");
-      setNombre("");
-      setPrecio(0);
-      setCalorias(0);
-      setInventario(0);
-      setEsVegetariano(false);
-      setEsSano(true);
-      setTipo("base");
-      setSabor("");
+      onSave();
+      setFormData({
+        nombre: "",
+        precio: "",
+        calorias: "",
+        inventario: "",
+        es_vegetariano: false,
+        es_sano: true,
+        tipo: "base",
+        sabor: "",
+      });
     }
   };
 
   return (
-    <div className="container mt-4">
-      <h3>Agregar Ingrediente</h3>
-      {message && <div className="alert alert-info">{message}</div>}
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label className="form-label">Nombre</label>
-          <input
-            className="form-control"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Precio</label>
-          <input
-            type="number"
-            className="form-control"
-            value={precio}
-            onChange={(e) => setPrecio(parseFloat(e.target.value))}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Calorías</label>
-          <input
-            type="number"
-            className="form-control"
-            value={calorias}
-            onChange={(e) => setCalorias(parseInt(e.target.value))}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Inventario</label>
-          <input
-            type="number"
-            className="form-control"
-            value={inventario}
-            onChange={(e) => setInventario(parseInt(e.target.value))}
-          />
-        </div>
-        <div className="form-check mb-3">
-          <input
-            className="form-check-input"
-            type="checkbox"
-            checked={esVegetariano}
-            onChange={(e) => setEsVegetariano(e.target.checked)}
-          />
-          <label className="form-check-label">Es Vegetariano</label>
-        </div>
-        <div className="form-check mb-3">
-          <input
-            className="form-check-input"
-            type="checkbox"
-            checked={esSano}
-            onChange={(e) => setEsSano(e.target.checked)}
-          />
-          <label className="form-check-label">Es Sano</label>
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Tipo</label>
-          <select
-            className="form-select"
-            value={tipo}
-            onChange={(e) => setTipo(e.target.value)}
-          >
-            <option value="base">Base</option>
-            <option value="complemento">Complemento</option>
-          </select>
-        </div>
-        <div className="mb-3">
+    <form onSubmit={handleSubmit} className="mb-4 border p-3 rounded">
+      <h5>{ingrediente ? "Editar" : "Nuevo"} Ingrediente</h5>
+      <div className="mb-2">
+        <label className="form-label">Nombre</label>
+        <input type="text" name="nombre" className="form-control" value={formData.nombre} onChange={handleChange} required />
+      </div>
+      <div className="mb-2">
+        <label className="form-label">Precio</label>
+        <input type="number" name="precio" className="form-control" value={formData.precio} onChange={handleChange} required />
+      </div>
+      <div className="mb-2">
+        <label className="form-label">Calorías</label>
+        <input type="number" name="calorias" className="form-control" value={formData.calorias} onChange={handleChange} required />
+      </div>
+      <div className="mb-2">
+        <label className="form-label">Inventario</label>
+        <input type="number" name="inventario" className="form-control" value={formData.inventario} onChange={handleChange} required />
+      </div>
+      <div className="form-check mb-2">
+        <input type="checkbox" name="es_vegetariano" className="form-check-input" checked={formData.es_vegetariano} onChange={handleChange} />
+        <label className="form-check-label">Vegetariano</label>
+      </div>
+      <div className="form-check mb-2">
+        <input type="checkbox" name="es_sano" className="form-check-input" checked={formData.es_sano} onChange={handleChange} />
+        <label className="form-check-label">Sano</label>
+      </div>
+      <div className="mb-2">
+        <label className="form-label">Tipo</label>
+        <select name="tipo" className="form-select" value={formData.tipo} onChange={handleChange}>
+          <option value="base">Base</option>
+          <option value="complemento">Complemento</option>
+        </select>
+      </div>
+      {formData.tipo === "base" && (
+        <div className="mb-2">
           <label className="form-label">Sabor</label>
-          <input
-            className="form-control"
-            value={sabor}
-            onChange={(e) => setSabor(e.target.value)}
-          />
+          <input type="text" name="sabor" className="form-control" value={formData.sabor} onChange={handleChange} />
         </div>
-        <button className="btn btn-primary" type="submit">
-          Guardar Ingrediente
-        </button>
-      </form>
-    </div>
+      )}
+      <button type="submit" className="btn btn-primary">{ingrediente ? "Actualizar" : "Crear"}</button>
+    </form>
   );
-}
+};
 
-export default IngredientesForm;
+export default IngredienteForm;

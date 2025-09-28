@@ -1,52 +1,56 @@
+// src/pages/LoginPage.jsx
 import React, { useState } from "react";
 import { supabase } from "../lib/supabaseClient";
+import { useNavigate } from "react-router-dom";
 
-function LoginPage({ onLogin }) {
+export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mensaje, setMensaje] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    setErrorMsg("");
+
+    const { user, error } = await supabase.auth.signIn({ email, password });
+
     if (error) {
-      setMensaje(error.message);
+      setErrorMsg(error.message);
     } else {
-      setMensaje(`Bienvenido ${data.user.user_metadata.nombre}`);
-      onLogin(data.user);
+      navigate("/home");
     }
   };
 
   return (
-    <div className="card p-3 my-3">
-      <h5>Iniciar Sesión</h5>
+    <div className="container mt-5" style={{ maxWidth: "400px" }}>
+      <h3 className="mb-4">Iniciar Sesión</h3>
+      {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
       <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          className="form-control my-2"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          className="form-control my-2"
-          placeholder="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit" className="btn btn-success">
-          Ingresar
+        <div className="mb-3">
+          <label className="form-label">Correo</label>
+          <input
+            type="email"
+            className="form-control"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label className="form-label">Contraseña</label>
+          <input
+            type="password"
+            className="form-control"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit" className="btn btn-primary w-100">
+          Entrar
         </button>
       </form>
-      {mensaje && <div className="mt-2 alert alert-info">{mensaje}</div>}
     </div>
   );
 }
-
-export default LoginPage;

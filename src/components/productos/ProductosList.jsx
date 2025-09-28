@@ -1,16 +1,14 @@
-import React, { useEffect, useState } from "react";
+// src/components/productos/ProductosList.jsx
+import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import ProductoCard from "./ProductoCard";
-import SellProductModal from "./SellProductModal";
 
-function ProductosList() {
+export default function ProductosList() {
   const [productos, setProductos] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const fetchProductos = async () => {
-    const { data, error } = await supabase.from("productos").select("*");
-    if (error) console.log(error.message);
-    else setProductos(data);
+    const { data } = await supabase.from("productos").select("*");
+    setProductos(data || []);
   };
 
   useEffect(() => {
@@ -19,21 +17,13 @@ function ProductosList() {
 
   return (
     <div className="container mt-4">
-      <h3>Productos</h3>
-      <div className="d-flex flex-wrap">
+      <div className="row g-3">
         {productos.map((p) => (
-          <ProductoCard key={p.id} producto={p} onSell={setSelectedProduct} />
+          <div key={p.id} className="col-md-4">
+            <ProductoCard producto={p} />
+          </div>
         ))}
       </div>
-
-      {selectedProduct && (
-        <SellProductModal
-          producto={selectedProduct}
-          onClose={() => setSelectedProduct(null)}
-        />
-      )}
     </div>
   );
 }
-
-export default ProductosList;

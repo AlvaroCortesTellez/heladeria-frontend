@@ -1,33 +1,36 @@
-import React, { useState } from "react";
-import ProductosPage from "./ProductosPage";
-import IngredientesPage from "./IngredientesPage";
-import LoginPage from "./LoginPage";
-import UserCreate from "../components/users/UserCreate";
-import UserList from "../components/users/UserList";
-import "bootstrap/dist/css/bootstrap.min.css";
+import React, { useEffect, useState } from "react";
+import { supabase } from "../lib/supabaseClient.js";
+import ProductoCard from "../components/productos/ProductoCard.jsx";
 
-function Home() {
-  const [page, setPage] = useState("login");
-  const [user, setUser] = useState(null);
+const Home = () => {
+  const [productos, setProductos] = useState([]);
+
+  useEffect(() => {
+    fetchProductos();
+  }, []);
+
+  const fetchProductos = async () => {
+    const { data, error } = await supabase
+      .from("productos")
+      .select("*")
+      .order("id", { ascending: true });
+
+    if (error) console.error(error);
+    else setProductos(data);
+  };
 
   return (
-    <div className="container my-4">
-      <h1 className="text-center mb-4">Heladería</h1>
-      <div className="mb-3 text-center">
-        <button className="btn btn-outline-primary mx-1" onClick={() => setPage("login")}>Login</button>
-        <button className="btn btn-outline-secondary mx-1" onClick={() => setPage("createUser")}>Crear Usuario</button>
-        <button className="btn btn-outline-info mx-1" onClick={() => setPage("userList")}>Usuarios</button>
-        <button className="btn btn-outline-success mx-1" onClick={() => setPage("ingredientes")}>Ingredientes</button>
-        <button className="btn btn-outline-warning mx-1" onClick={() => setPage("productos")}>Productos</button>
+    <div className="container mt-4">
+      <h2 className="mb-4">Productos disponibles</h2>
+      <div className="row">
+        {productos.map((prod) => (
+          <div className="col-md-4 mb-3" key={prod.id}>
+            <ProductoCard producto={prod} />
+          </div>
+        ))}
       </div>
-
-      {page === "login" && <LoginPage onLogin={setUser} />}
-      {page === "createUser" && <UserCreate />}
-      {page === "userList" && <UserList />}
-      {page === "ingredientes" && <IngredientesPage />}
-      {page === "productos" && <ProductosPage />}
     </div>
   );
-}
+};
 
 export default Home;

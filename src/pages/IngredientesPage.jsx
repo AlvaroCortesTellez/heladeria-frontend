@@ -1,13 +1,16 @@
 import React, { useState } from "react";
-import IngredienteForm from "../components/ingredientes/IngredienteForm";
-import IngredientesList from "../components/ingredientes/IngredientesList";
+import IngredientesForm from "../ingredientes/IngredientesForm";
+import IngredientesList from "../ingredientes/IngredientesList";
 
 export default function IngredientesPage() {
   const [refresh, setRefresh] = useState(false);
+
+  const handleIngredienteCreated = () => setRefresh(!refresh);
+
   return (
-    <div className="container mt-4">
-      <h2>Gestión de Ingredientes</h2>
-      <IngredienteForm onSave={()=>setRefresh(!refresh)} />
+    <div>
+      <h1>Gestión de Ingredientes</h1>
+      <IngredientesForm onIngredienteCreated={handleIngredienteCreated} />
       <IngredientesList key={refresh} />
     </div>
   );

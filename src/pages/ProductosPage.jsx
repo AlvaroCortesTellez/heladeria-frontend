@@ -1,10 +1,10 @@
 import React from "react";
-import ProductosList from "../components/productos/ProductosList";
+import ProductosList from "../productos/ProductosList";
 
 export default function ProductosPage() {
   return (
-    <div className="container mt-4">
-      <h2>Productos</h2>
+    <div>
+      <h1>Gestión de Productos</h1>
       <ProductosList />
     </div>
   );
